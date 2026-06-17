@@ -1,0 +1,84 @@
+# SPDX-License-Identifier: Apache-2.0
+# NemoDesk evaluation config. Runs the full multi-agent workflow over the eval
+# dataset and scores it with RAGAS metrics using a Nemotron NIM as judge.
+#
+#   nat eval --config_file configs/eval_config.yml
+
+llms:
+  supervisor_llm:
+    _type: nim
+    model_name: nvidia/nemotron-3-nano-30b-a3b
+    temperature: 0.2
+    max_tokens: 1024
+    chat_template_kwargs:
+      enable_thinking: false
+  worker_llm:
+    _type: nim
+    model_name: nvidia/nemotron-3-nano-30b-a3b
+    temperature: 0.0
+    max_tokens: 1024
+    chat_template_kwargs:
+      enable_thinking: false
+  judge_llm:
+    _type: nim
+    model_name: nvidia/nemotron-3-nano-30b-a3b
+    temperature: 0.0
+
+embedders:
+  kb_embedder:
+    _type: nim
+    model_name: nvidia/nv-embedqa-e5-v5
+
+functions:
+  pii_redactor:
+    _type: pii_redactor
+  ticket_classifier:
+    _type: ticket_classifier
+    llm_name: worker_llm
+  kb_search:
+    _type: kb_search
+    kb_dir: data/knowledge_base
+    embedder_name: kb_embedder
+    top_k: 4
+  escalation_router:
+    _type: escalation_router
+  itsm_connector:
+    _type: itsm_connector
+    store_path: data/itsm_store.jsonl
+  triage_agent:
+    _type: tool_calling_agent
+    tool_names: [pii_redactor, ticket_classifier, escalation_router]
+    llm_name: worker_llm
+    verbose: true
+    handle_tool_errors: true
+    description: "Triage: redact PII, classify category + priority, route to team."
+  resolution_agent:
+    _type: tool_calling_agent
+    tool_names: [kb_search, itsm_connector]
+    llm_name: worker_llm
+    verbose: true
+    handle_tool_errors: true
+    description: "Resolution: find runbook steps and record the ITSM ticket."
+
+workflow:
+  _type: react_agent
+  tool_names: [triage_agent, resolution_agent]
+  llm_name: supervisor_llm
+  verbose: true
+  parse_agent_response_max_retries: 3
+
+eval:
+  general:
+    output_dir: .tmp/nemodesk/eval/
+    dataset:
+      _type: json
+      file_path: eval/eval_dataset.json
+  evaluators:
+    accuracy:
+      _type: ragas
+      metric: AnswerAccuracy
+      llm_name: judge_llm
+    groundedness:
+      _type: ragas
+      metric: ResponseGroundedness
+      llm_name: judge_llm

@@ -1,0 +1,62 @@
+[
+  {
+    "id": "T1",
+    "text": "Outlook keeps crashing on launch right after the latest Windows update on my Dell laptop. My email is john.doe@acme.com.",
+    "expected_category": "email_collaboration",
+    "expected_priority": "P3"
+  },
+  {
+    "id": "T2",
+    "text": "URGENT: the corporate VPN is down for our entire Mumbai office, nobody can connect and production support is blocked.",
+    "expected_category": "network",
+    "expected_priority": "P1"
+  },
+  {
+    "id": "T3",
+    "text": "I'm locked out of my account after too many login attempts. Please reset. Call me at +1 415-555-0198.",
+    "expected_category": "access_management",
+    "expected_priority": "P3"
+  },
+  {
+    "id": "T4",
+    "text": "My laptop won't power on at all, no charging light. Asset tag AC-44821. Battery looks swollen.",
+    "expected_category": "hardware",
+    "expected_priority": "P2"
+  },
+  {
+    "id": "T5",
+    "text": "I got an email asking me to verify my password at hxxp://acme-login.ru and I entered my credentials. password: Summer2026!",
+    "expected_category": "security_incident",
+    "expected_priority": "P1"
+  },
+  {
+    "id": "T6",
+    "text": "Our payments pods are in CrashLoopBackOff on the prod cluster, customers seeing 503s on checkout.",
+    "expected_category": "cloud_infra",
+    "expected_priority": "P1"
+  },
+  {
+    "id": "T7",
+    "text": "Reporting database queries are timing out and we see deadlocks during nightly batch. Replica IP 10.2.4.19 lagging.",
+    "expected_category": "database",
+    "expected_priority": "P2"
+  },
+  {
+    "id": "T8",
+    "text": "Cannot install the new CAD application, getting license error code 0x80070643. I have a license assigned.",
+    "expected_category": "software",
+    "expected_priority": "P3"
+  },
+  {
+    "id": "T9",
+    "text": "Teams calendar not syncing and meeting invites disappear from my mailbox jane.smith@acme.com.",
+    "expected_category": "email_collaboration",
+    "expected_priority": "P3"
+  },
+  {
+    "id": "T10",
+    "text": "WiFi at the Bangalore office keeps dropping every few minutes for everyone on the 5th floor.",
+    "expected_category": "network",
+    "expected_priority": "P2"
+  }
+]

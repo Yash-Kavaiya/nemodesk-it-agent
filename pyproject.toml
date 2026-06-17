@@ -1,0 +1,48 @@
+# SPDX-License-Identifier: Apache-2.0
+[build-system]
+requires = ["setuptools>=64", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "nemodesk"
+version = "0.1.0"
+description = "NemoDesk - Enterprise IT Ticket Resolution Agentic System built on the NVIDIA NeMo Agent Toolkit"
+readme = "README.md"
+requires-python = ">=3.11,<3.14"
+license = { text = "Apache-2.0" }
+keywords = ["ai", "agents", "itsm", "nvidia", "nemo", "nemotron", "rag", "agentic"]
+authors = [{ name = "Yash Kavaiya" }]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: Apache Software License",
+    "Intended Audience :: Developers",
+]
+dependencies = [
+    "nvidia-nat[langchain]>=1.5.0",
+    "fastapi>=0.110",
+    "uvicorn[standard]>=0.27",
+    "pydantic>=2.6",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=8.0", "pytest-asyncio>=0.23", "ruff>=0.4"]
+
+[project.urls]
+Homepage = "https://github.com/Yash-Kavaiya/nemodesk-it-agent"
+Repository = "https://github.com/Yash-Kavaiya/nemodesk-it-agent"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+# Register NemoDesk components with the NeMo Agent Toolkit plugin system.
+# `nat` discovers tools/workflows via this entry point.
+[project.entry-points.'nat.components']
+nemodesk = "nemodesk.register"
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+testpaths = ["tests"]
+
+[tool.ruff]
+line-length = 120
+target-version = "py311"

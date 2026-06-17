@@ -1,0 +1,15 @@
+# SPDX-License-Identifier: Apache-2.0
+services:
+  nemodesk:
+    build: .
+    image: nemodesk:0.1.0
+    ports:
+      - "8080:8080"
+    environment:
+      # Provide your key from build.nvidia.com (do not commit it).
+      NVIDIA_API_KEY: ${NVIDIA_API_KEY:?Set NVIDIA_API_KEY in your shell or .env}
+      NEMODESK_CONFIG: configs/config.yml
+    volumes:
+      # Persist the mock ITSM store across restarts.
+      - ./data:/app/data
+    restart: unless-stopped

@@ -1,0 +1,122 @@
+# SPDX-License-Identifier: Apache-2.0
+# =============================================================================
+# NemoDesk - Enterprise IT Ticket Resolution Agentic System
+# Multi-agent workflow on the NVIDIA NeMo Agent Toolkit (NemoClaw / Track A)
+#
+# Architecture:
+#   Supervisor (react_agent, Nemotron)
+#     |-- triage_agent     (tool_calling_agent): pii_redactor -> ticket_classifier -> escalation_router
+#     |-- resolution_agent (tool_calling_agent): kb_search -> itsm_connector
+#
+# Run:
+#   export NVIDIA_API_KEY=nvapi-...
+#   nat run --config_file configs/config.yml \
+#     --input "Outlook keeps crashing on launch after the latest Windows update on my laptop."
+# =============================================================================
+
+llms:
+  # Orchestrator: reasons about which expert agent to call.
+  supervisor_llm:
+    _type: nim
+    model_name: nvidia/nemotron-3-nano-30b-a3b
+    temperature: 0.2
+    max_tokens: 1024
+    chat_template_kwargs:
+      enable_thinking: false
+
+  # Worker: deterministic tool execution (low temperature).
+  worker_llm:
+    _type: nim
+    model_name: nvidia/nemotron-3-nano-30b-a3b
+    temperature: 0.0
+    max_tokens: 1024
+    chat_template_kwargs:
+      enable_thinking: false
+
+embedders:
+  kb_embedder:
+    _type: nim
+    model_name: nvidia/nv-embedqa-e5-v5
+
+functions:
+  # ---- Custom NemoDesk tools (registered via the `nemodesk` plugin) ----
+  pii_redactor:
+    _type: pii_redactor
+
+  ticket_classifier:
+    _type: ticket_classifier
+    llm_name: worker_llm
+
+  kb_search:
+    _type: kb_search
+    kb_dir: data/knowledge_base
+    embedder_name: kb_embedder
+    top_k: 4
+
+  escalation_router:
+    _type: escalation_router
+
+  itsm_connector:
+    _type: itsm_connector
+    store_path: data/itsm_store.jsonl
+
+  # ---- Expert sub-agents ----
+  triage_agent:
+    _type: tool_calling_agent
+    tool_names: [pii_redactor, ticket_classifier, escalation_router]
+    llm_name: worker_llm
+    verbose: true
+    handle_tool_errors: true
+    description: >-
+      Triage expert. Redacts PII, classifies the ticket into a category and SLA
+      priority (P1-P4), and routes it to the owning team with an SLA due time.
+      Use this FIRST for any new ticket. Returns category, priority, team and SLA.
+
+  resolution_agent:
+    _type: tool_calling_agent
+    tool_names: [kb_search, itsm_connector]
+    llm_name: worker_llm
+    verbose: true
+    handle_tool_errors: true
+    description: >-
+      Resolution expert. Searches the approved knowledge base / runbooks for the
+      classified problem, drafts concrete step-by-step resolution instructions,
+      and records the final ticket in the ITSM system. Use this AFTER triage.
+
+workflow:
+  _type: react_agent
+  tool_names: [triage_agent, resolution_agent]
+  llm_name: supervisor_llm
+  verbose: true
+  parse_agent_response_max_retries: 3
+  system_prompt: |
+    You are NemoDesk, an enterprise IT service-desk supervisor. For every ticket
+    you coordinate two experts to deliver a complete, auditable outcome.
+
+    Process every ticket in this order:
+      1. Call triage_agent to redact PII, classify (category + P1-P4 priority) and
+         route the ticket to the owning team with an SLA.
+      2. Call resolution_agent to find runbook-grounded resolution steps and record
+         the ticket in the ITSM system.
+      3. Produce a final answer containing: category, priority, assigned team, SLA,
+         the ITSM ticket id, and the numbered resolution steps. If the issue is a
+         security incident (P1/SecOps) or cannot be auto-resolved, clearly state
+         that it has been escalated to a human team.
+
+    You have access to the following experts:
+
+    {tools}
+
+    Use the following format exactly to communicate with an expert:
+
+    Question: the input question you must answer
+    Thought: you should always think about what to do
+    Action: the action to take, should be one of [{tool_names}]
+    Action Input: the input to the action (if there is no required input, include "Action Input: None")
+    Observation: wait for the expert to respond, do not assume the expert's response
+
+    ... (this Thought/Action/Action Input/Observation can repeat N times.)
+    Use the following format once you have the final answer:
+
+    Thought: I now know the final answer
+    Final Answer: the final answer to the original ticket, formatted as described above

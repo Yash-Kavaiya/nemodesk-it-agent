@@ -1,0 +1,52 @@
+[
+  {
+    "id": "T1",
+    "question": "Outlook keeps crashing on launch right after the latest Windows update on my Dell laptop. My email is john.doe@acme.com.",
+    "answer": "category=email_collaboration, priority=P3"
+  },
+  {
+    "id": "T2",
+    "question": "URGENT: the corporate VPN is down for our entire Mumbai office, nobody can connect and production support is blocked.",
+    "answer": "category=network, priority=P1"
+  },
+  {
+    "id": "T3",
+    "question": "I'm locked out of my account after too many login attempts. Please reset. Call me at +1 415-555-0198.",
+    "answer": "category=access_management, priority=P3"
+  },
+  {
+    "id": "T4",
+    "question": "My laptop won't power on at all, no charging light. Asset tag AC-44821. Battery looks swollen.",
+    "answer": "category=hardware, priority=P2"
+  },
+  {
+    "id": "T5",
+    "question": "I got an email asking me to verify my password at hxxp://acme-login.ru and I entered my credentials. password: Summer2026!",
+    "answer": "category=security_incident, priority=P1"
+  },
+  {
+    "id": "T6",
+    "question": "Our payments pods are in CrashLoopBackOff on the prod cluster, customers seeing 503s on checkout.",
+    "answer": "category=cloud_infra, priority=P1"
+  },
+  {
+    "id": "T7",
+    "question": "Reporting database queries are timing out and we see deadlocks during nightly batch. Replica IP 10.2.4.19 lagging.",
+    "answer": "category=database, priority=P2"
+  },
+  {
+    "id": "T8",
+    "question": "Cannot install the new CAD application, getting license error code 0x80070643. I have a license assigned.",
+    "answer": "category=software, priority=P3"
+  },
+  {
+    "id": "T9",
+    "question": "Teams calendar not syncing and meeting invites disappear from my mailbox jane.smith@acme.com.",
+    "answer": "category=email_collaboration, priority=P3"
+  },
+  {
+    "id": "T10",
+    "question": "WiFi at the Bangalore office keeps dropping every few minutes for everyone on the 5th floor.",
+    "answer": "category=network, priority=P2"
+  }
+]
