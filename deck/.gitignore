@@ -1,5 +1,6 @@
 node_modules/
 *.pdf
+!NemoDesk_Pitch_Deck.pdf
 deck_text.txt
 slide-*.jpg
 to_pdf.ps1

@@ -1,8 +1,11 @@
 # NemoDesk Pitch Deck
 
-`NemoDesk_Pitch_Deck.pptx` — 12-slide deck for the India Agentic AI Open
-Hackathon (Track A: Agentic Workflows). Generated from `build_deck.js` with
+12-slide deck for the India Agentic AI Open Hackathon (Track A: Agentic
+Workflows). Generated from `build_deck.js` with
 [PptxGenJS](https://gitbrent.github.io/PptxGenJS/), NVIDIA-green theme.
+
+- `NemoDesk_Pitch_Deck.pptx` — editable PowerPoint source
+- `NemoDesk_Pitch_Deck.pdf` — ready-to-upload PDF export
 
 ## Regenerate
 
