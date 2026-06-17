@@ -18,8 +18,11 @@ from __future__ import annotations
 
 import os
 from contextlib import asynccontextmanager
+from pathlib import Path
 
 from fastapi import FastAPI, HTTPException
+from fastapi.responses import FileResponse
+from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
 
 CONFIG_FILE = os.environ.get("NEMODESK_CONFIG", "configs/config.yml")
@@ -94,3 +97,37 @@ async def resolve_ticket(req: TicketRequest):
         raise HTTPException(status_code=500, detail=f"Workflow error: {exc}") from exc
 
     return TicketResponse(external_id=req.external_id, result=result)
+
+
+@app.post("/v1/tickets/demo")
+async def demo_ticket(req: TicketRequest):
+    """Deterministic, offline demo of the agentic pipeline (no NVIDIA_API_KEY needed).
+
+    Powers the UI's demo mode and is always available. Returns a structured result
+    (category, priority, team, SLA, runbook steps, ITSM id) so the UI can render the
+    full outcome even without a configured NIM endpoint.
+    """
+    from api.demo_pipeline import run_demo
+
+    kb_dir = os.environ.get("NEMODESK_KB_DIR", "data/knowledge_base")
+    try:
+        return run_demo(req.text, kb_dir=kb_dir, external_id=req.external_id)
+    except Exception as exc:  # noqa: BLE001
+        raise HTTPException(status_code=500, detail=f"Demo pipeline error: {exc}") from exc
+
+
+# ---- Static UI (served at /) ----
+_UI_DIR = Path(__file__).resolve().parent / "ui"
+
+
+@app.get("/", include_in_schema=False)
+async def ui_index():
+    index = _UI_DIR / "index.html"
+    if index.exists():
+        return FileResponse(str(index))
+    raise HTTPException(status_code=404, detail="UI not found")
+
+
+if _UI_DIR.exists():
+    app.mount("/ui", StaticFiles(directory=str(_UI_DIR), html=True), name="ui")
+

@@ -82,17 +82,29 @@ nat run --config_file configs/config.yml \
   --input "Outlook keeps crashing on launch after the latest Windows update on my laptop."
 ```
 
-### 4. Serve the REST API
+### 4. Serve the REST API + Web UI
 
 ```bash
 uvicorn api.server:app --host 0.0.0.0 --port 8080
-# then:
-curl -X POST localhost:8080/v1/tickets/resolve \
+```
+
+Then open **http://localhost:8080/** for the NemoDesk web UI — submit a ticket and
+watch it get triaged, PII-redacted, routed, and resolved. The UI has two modes:
+
+- **Demo (no API key)** — runs the deterministic pipeline (`/v1/tickets/demo`);
+  works out of the box with no `NVIDIA_API_KEY`.
+- **Live agent (NIM)** — calls the full multi-agent workflow (`/v1/tickets/resolve`);
+  needs `NVIDIA_API_KEY` and `nvidia-nat` installed.
+
+REST example:
+
+```bash
+curl -X POST localhost:8080/v1/tickets/demo \
   -H 'Content-Type: application/json' \
   -d '{"text":"VPN is down for the whole office, production support blocked","external_id":"SNOW-123"}'
 ```
 
-### 5. Launch the NeMo Agent Toolkit chat UI
+### 5. (Optional) Launch the NeMo Agent Toolkit chat UI
 
 ```bash
 nat serve --config_file configs/config.yml
@@ -137,7 +149,7 @@ configs/        config.yml (workflow) + eval_config.yml
 src/nemodesk/   package: models, register (plugin entry point)
   tools/        pii_redactor, classifier, kb_search, escalation (+itsm)
 data/           knowledge_base/*.md runbooks + sample_tickets.json
-api/            FastAPI REST integration layer
+api/            FastAPI REST integration layer + web UI (api/ui/index.html)
 eval/           eval dataset
 scripts/        batch demo runner
 docs/           ARCHITECTURE.md, PITCH_DECK.md
