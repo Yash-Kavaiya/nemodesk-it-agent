@@ -1,0 +1,5 @@
+node_modules/
+*.pdf
+deck_text.txt
+slide-*.jpg
+to_pdf.ps1
